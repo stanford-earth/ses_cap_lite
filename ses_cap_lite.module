@@ -405,6 +405,7 @@ function _ses_cap_lite_update_profiles($single_sunet = NULL) {
     $profile_updated_count = 0;
     $profile_failed_count = 0;
     $return_url = FALSE;
+    $abort_process = FALSE;
 
     if (!empty($single_sunet)) {
         $wg_array = array(trim($single_sunet));
@@ -437,6 +438,11 @@ function _ses_cap_lite_update_profiles($single_sunet = NULL) {
             // size in its preprocessing hook
             if (sizeof(module_implements('ses_cap_lite_preprocess_wg')) > 0) {
                 $wg_counts = module_invoke_all('ses_cap_lite_preprocess_wg',$group);
+                if ($wg_counts === FALSE) {
+                    drupal_set_message('Unable to process workgroup '.$group.'. Halting update process.','error');
+                    $abort_process = TRUE;
+                    break;
+                }
                 $wg_max = 0;
                 foreach ($wg_counts as $wg_size) {
                     $wg_max = ($wg_size > $wg_max) ? $wg_size : $wg_max;
@@ -468,7 +474,7 @@ function _ses_cap_lite_update_profiles($single_sunet = NULL) {
     }
 
     // allow other modules to do any final postprocessing
-    if (sizeof(module_implements('ses_cap_lite_postprocess_all')) > 0) {
+    if (!$abort_process && sizeof(module_implements('ses_cap_lite_postprocess_all')) > 0) {
         module_invoke_all('ses_cap_lite_postprocess_all',$single_sunet);
     }
 
