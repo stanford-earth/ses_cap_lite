@@ -149,9 +149,6 @@ function ses_cap_lite_permission() {
  */
 function ses_cap_lite_auth($user = '', $pass = '', $auth_uri = '') {
 
-    //$x1 = decrypt(variable_get('ses_cap_lite_clientid','');
-    //$x2 = decrypt(variable_get('ses_cap_lite_password','');
-    //watchdog('debug','hey ken: '.$x1 . ' ' . $x2);
     $token_expire = variable_get('ses_cap_lite_token_expire', REQUEST_TIME-1);
     if ($token_expire <= REQUEST_TIME || !empty($user) || !empty($pass)) {
 
@@ -163,9 +160,7 @@ function ses_cap_lite_auth($user = '', $pass = '', $auth_uri = '') {
         if (empty($pass)) {
             $pass = variable_get('ses_cap_lite_password','');
             if (module_exists('encrypt')) $pass = decrypt($pass);
-            //watchdog('debug','thing: '.$pass);
         }
-        //watchdog('debug','thing: '.$pass);
         $params = array(
             'grant_type' => 'client_credentials',
         );
@@ -417,7 +412,8 @@ function _ses_cap_lite_update_profiles($single_sunet = NULL) {
     }
 
     // process each workgroup or sunet in the list
-    foreach ($wg_array as $group) {
+    foreach ($wg_array as $group_in) {
+        $group = trim($group_in);
         if (isset($single_sunet)) {
             module_invoke_all('ses_cap_lite_preprocess_sunet',$group);
             $params = array('uids' => $group);
@@ -453,9 +449,7 @@ function _ses_cap_lite_update_profiles($single_sunet = NULL) {
             // call the CAP API to get all the profiles in the workgroup
             $params = array('privGroups' => $group,'ps'=>$wg_count);
         }
-
         $data = ses_cap_lite_request('/profiles/v1',$params);
- 
         // if we have profiles, process them one at a time and keep count
         if ($data !== FALSE && !empty($data['values'])) {
             foreach ($data['values'] as $cap_profile) {

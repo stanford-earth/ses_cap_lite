@@ -420,12 +420,14 @@ function _ses_cap_lite_get_profile_photo($capData = array(),$cap_field) {
         $file_array = array();
     } else {
         $file_temp = file_get_contents($capDataItem['bigger']['url']);
+        $alt_str = 'Profile Image';
+        if (!empty($capData['displayName'])) $alt_str .= ' for ' . $capData['displayName'];
         $file_temp = file_save_data($file_temp, 'public://profile_' . $sunet . '_bigger.jpg', FILE_EXISTS_REPLACE);
         $file_array = array(LANGUAGE_NONE=>array(array('fid'=>$file_temp->fid,
                                                'filename'=>$file_temp->filename,
                                                'filemime'=>$file_temp->filemime,
                                                'uri'=>$file_temp->uri, 'uid'=>1,
-                                               'status'=>1, 'display'=>1)));
+                                               'status'=>1, 'display'=>1, 'alt'=>$alt_str)));
         image_path_flush($file_temp->uri);
     }
     return $file_array;
