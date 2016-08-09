@@ -456,6 +456,7 @@ function _ses_cap_lite_update_profiles($single_sunet = NULL) {
                 if (_ses_cap_lite_update_single_profile($cap_fields,$weighted_fields,$cap_profile,$output,$return_url)) {
                     $profile_updated_count += 1;
                 } else {
+                    watchdog('ses_cap_lite','cap update failed for '.$cap_profile['uid']);
                     $profile_failed_count += 1;
                 }
             }
