@@ -684,6 +684,9 @@ function _ses_cap_lite_create_profile_entity($bundle="page",$displayName="First 
 // save the user account or node containing the profile information
 function _ses_cap_lite_save_profile_entity($bundle,$entityObj,$fields) {
     $entity_id = FALSE;
+    if (!empty($entityObj->field_cap_profile_image) && empty($fields['field_cap_profile_image'])) {
+        unset($fields['field_cap_profile_image']);
+    }
     if ($bundle === 'user') {
         user_save($entityObj,$fields);
         $entity_id = $entityObj->uid;
