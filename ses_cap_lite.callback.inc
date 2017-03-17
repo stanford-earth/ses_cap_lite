@@ -474,8 +474,8 @@ function _ses_cap_lite_get_courses_list($capData = array(),$cap_field) {
                 $output .= '<div class="cap_course_course_label">Independent Study Courses</div>';
                 $output .= '<ul class="'.$cap_field.'-ul">';
                 foreach ($lineitem['independentStudyCourses'] as $course) {
-                    $output .= '<li class="'.$cap_field.'-li">'.$course['label']['html'].'&nbsp'.
-                               $course['label']['text'].'</li>';
+                    $output .= '<li class="'.$cap_field.'-li">'.$course['label']['html'].'</li>';
+//'&nbsp;'.$course['label']['text'].'</li>';
                 }
                 $output .= '</ul>';
             }

@@ -740,9 +740,14 @@ function _ses_cap_lite_get_weighted_field_mapping($bundle) {
 
 // cron to update profiles once per day
 function ses_cap_lite_cron() {
+    if (date('G') == 3) {
+        _ses_cap_lite_update_profiles();
+    }
+/*
     if (time() >= variable_get('ses_cap_lite_next_cron',0)) {
         $interval = 60 * 60 * 24; // daily
         variable_set('ses_cap_lite_next_cron', time() + $interval);
         _ses_cap_lite_update_profiles();
     }
+*/
 }
