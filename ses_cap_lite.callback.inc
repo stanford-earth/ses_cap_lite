@@ -19,6 +19,9 @@ function _ses_cap_lite_profile_fields() {
         'administrativeAppointments' => array(
             'field_type' => 'text_long',
             'build_callback' => '_ses_cap_lite_get_field_list'),
+        'advisees' => array(
+            'field_type' => 'text_long',
+            'build_callback' => '_ses_cap_lite_get_advisees'),
         'alias' => array(
             'field_type' => 'text_long',
             'build_callback' => '_ses_cap_lite_get_cap_link'),
@@ -91,9 +94,11 @@ function _ses_cap_lite_profile_fields() {
         'personalInterests' => array(
             'field_type' => 'text_long',
             'build_callback' => '_ses_cap_lite_get_html_field'),
+        /*
         'postdoctoralAdvisees' => array(
             'field_type' => 'text_long',
             'build_callback' => '_ses_cap_lite_get_field_list'),
+        */
         'presentations' => array(
             'field_type' => 'text_long',
             'build_callback' => '_ses_cap_lite_get_field_list'),
@@ -490,3 +495,38 @@ function _ses_cap_lite_get_courses_list($capData = array(),$cap_field) {
     }
     return $output;
 }
+
+/*
+ * This function returns a list of advisees, sorted by advisee type
+ *
+ * The field is constructed using <ul> and <li> tags
+ */
+function _ses_cap_lite_get_advisees($capData = array(),$cap_field) {
+    if (empty($cap_field) || !isset($capData[$cap_field])) return array();
+    $capDataItem = $capData[$cap_field];
+    if (empty($capDataItem) || !is_array($capDataItem)) {
+        $output = array();
+    } else {
+        $adviseeList = array();
+        foreach ($capDataItem as $advisee) {
+            if (!isset($adviseeList[$advisee['code']])) {
+                $adviseeList[$advisee['code']] = array(
+                    'role' => $advisee['role'],
+                    'advisees' => array(),
+                );
+            }
+            $adviseeList[$advisee['code']]['advisees'][] = $advisee['advisee']['label']['html'];
+        }
+        ksort($adviseeList);
+        $output = '<div class="'.$cap_field.'-div"><ul class="'.$cap_field.'-ul">';
+        foreach($adviseeList as $lineitem) {
+            $advisee_names = implode(", ", $lineitem['advisees']);
+            $output .= '<li class="'.$cap_field.'-li">'.$lineitem['role'].': '.$advisee_names.'</li>';
+        }
+        $output .= '</ul></div>';
+        $output = array(LANGUAGE_NONE=>array(array('value'=>$output,
+          'format'=>variable_get('ses_cap_lite_filter_format',filter_fallback_format()))));
+    }
+    return $output;
+}
+
