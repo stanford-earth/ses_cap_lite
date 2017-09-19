@@ -131,7 +131,7 @@ function _ses_cap_lite_profile_fields() {
             'build_callback' => '_ses_cap_lite_get_profile_photo'),
         'projects' => array(
             'field_type' => 'text_long',
-            'build_callback' => '_ses_cap_lite_get_field_list'),
+            'build_callback' => '_ses_cap_lite_get_project_list'),
         'publications' => array(
             'field_type' => 'text_long',
             'build_callback' => '_ses_cap_lite_get_publications_list'),
@@ -176,6 +176,27 @@ function _ses_cap_lite_get_field_list($capData = array(),$cap_field) {
             $output .= '<li class="'.$cap_field.'-li">'.$lineitem['label']['html'].'</li>';
         }
         $output .= '</ul></div>';
+        $output = array(LANGUAGE_NONE=>array(array('value'=>$output,
+            'format'=>variable_get('ses_cap_lite_filter_format',filter_fallback_format()))));
+    }
+    return $output;
+}
+
+/*
+ * This routine returns the html for label and detail for each project in the profile
+ */
+function _ses_cap_lite_get_project_list($capData = array(),$cap_field) {
+    if (empty($cap_field) || !isset($capData[$cap_field])) return array();
+    $capDataItem = $capData[$cap_field];
+    if (empty($capDataItem) || !is_array($capDataItem)) {
+        $output = array();
+    } else {
+        $output = '<div class="'.$cap_field.'-div">';
+        foreach($capDataItem as $lineitem) {
+            $output .= '<details><summary>'.$lineitem['label']['html'].'</summary>';
+            $output .= '<br />'.$lineitem['detail']['html'].'</details>';
+        }
+        $output .= '</div>';
         $output = array(LANGUAGE_NONE=>array(array('value'=>$output,
             'format'=>variable_get('ses_cap_lite_filter_format',filter_fallback_format()))));
     }
