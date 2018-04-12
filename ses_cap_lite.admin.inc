@@ -27,12 +27,18 @@ function ses_cap_lite_settings($form, &$form_state) {
         $markup_str .= '<br />We strongly recommend installing and configuring the \'encrypt\' module before proceeding, otherwise your CAP API credentials will be stored in the database as clear text.';
     }
 
+// now proxying CAP requests through sesincub - ksharp 01/09/2018
+
     // see if we can authenticate the current credentials and post a message if we can
     $authd = FALSE;
     $auth_token = ses_cap_lite_auth($clientid, $password);
     if ($auth_token) {
         $markup_str .= '<br /><br />Good news! Your credentials are set and valid and your site can currently connect to the CAP API.';
     }
+/*
+    $markup_str .= '<br /><br />CAP API requests are now being proxied through secincub.stanford.edu. Please contact Stanford Earth web services for more information.';
+*/
+// end proxy patch ksharp
 
     // set up the form
     $form['description_wrapper'] = array(
@@ -96,7 +102,9 @@ function ses_cap_lite_settings_validate($form, &$form_state) {
     $username = $form_state['values']['ses_cap_lite_clientid'];
     $password = $form_state['values']['ses_cap_lite_password'];
     $auth_uri = $form_state['values']['ses_cap_lite_auth_uri'];
+    // patch because all CAP API calls are now proxied by sesincub.stanford.edu
     $auth_token = ses_cap_lite_auth($username, $password, $auth_uri);
+    //$auth_token = true;
     if (!$auth_token) {
       form_set_error('ses_cap_lite_clientid', t("Error. Can't connect to Stanford CAP API. Please check your client id  and password."));
       form_set_error('ses_cap_lite_password');

@@ -150,8 +150,8 @@ function ses_cap_lite_permission() {
 function ses_cap_lite_auth($user = '', $pass = '', $auth_uri = '') {
 
     $token_expire = variable_get('ses_cap_lite_token_expire', REQUEST_TIME-1);
-    if ($token_expire <= REQUEST_TIME || !empty($user) || !empty($pass)) {
-
+    //if ($token_expire <= REQUEST_TIME || !empty($user) || !empty($pass)) {
+    if (true) {
         $auth_uri = empty($auth_uri) ? variable_get('ses_cap_lite_auth_uri', 'https://authz.stanford.edu/oauth/token') : $auth_uri;
         if (empty($user)) {
             $user = variable_get('ses_cap_lite_clientid','');
@@ -174,7 +174,27 @@ function ses_cap_lite_auth($user = '', $pass = '', $auth_uri = '') {
         $host = $user . ':' . $pass . '@' . $uri['host'];
         $auth_url = str_replace($uri['host'], $host, $auth_uri);
         $auth_url = url($auth_url, array('query' => $params, 'external' => TRUE));
-        $response = drupal_http_request($auth_url);
+
+// added by ksharp 11/27/2017 to proxy request through sesincub
+/*
+    $proxy_url = "https://sesincub.stanford.edu/mais/cap_api_proxy.php?drupal_url=".$auth_url;
+    $proxy_response = drupal_http_request($proxy_url);
+    if (property_exists($proxy_response, 'error')) {
+        $error_msg = 'Failed to authenticate at CAP API proxy on sesincub. Error code is'
+            . ' %code, error message is "%msg", request string was "%request".';
+        $vars = array(
+            '%code' => $proxy_response->code,
+            '%msg' => isset($proxy_response->status_message) ? $proxy_response->status_message : $proxy_response->error,
+            '%request' => $proxy_url,
+        );
+        watchdog('ses_cap_lite', $error_msg, $vars, WATCHDOG_WARNING);
+        return FALSE;
+    }
+    $response = json_decode($proxy_response->data,false);
+*/
+    $response = drupal_http_request($auth_url);
+//
+
         // check for error
         if (property_exists($response, 'error')) {
             $error_msg = 'Failed to authenticate at CAP API service. Error code is'
@@ -237,22 +257,33 @@ function ses_cap_lite_auth($user = '', $pass = '', $auth_uri = '') {
  *   Decoded JSON response or FALSE.
  */
 function ses_cap_lite_request($endpoint, $params = array(), $raw = FALSE) {
+    global $user;
+
     $api_base = variable_get('ses_cap_lite_base_url', 'https://api.stanford.edu');
 
+    // updated by ksharp on 01/08/2018 to use CAP API proxy on sesincub
+    //$api_base = 'https://sesincub.stanford.edu/d7_cap_proxy/return_cap_json';
+    //$params['endpoint'] = $endpoint;
+    //$endpoint = '';
+    
+    
     $access_token = ses_cap_lite_auth();
     // Unable to fetch an auth token.
     if (empty($access_token)) {
         return FALSE;
     }
 
+
     $params['access_token'] = $access_token;
+    
 
     $request_url = url($api_base . $endpoint, array(
         'query' => $params,
         'external' => TRUE,
     ));
-
+   
     $response = drupal_http_request($request_url);
+
     // Error could be here as well.
     if (property_exists($response, 'error')) {
         $error_msg = 'Failed to fetch data from CAP API service. Error code is'
